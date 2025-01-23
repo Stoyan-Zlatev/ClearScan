@@ -1,0 +1,74 @@
+mode: sequential
+step: cnn
+steps:
+  - download-dataset:
+      name: Download dataset
+      description: Use kaggle API
+      enabled: false
+      script: /src/preprocessing/run_download_dataset.py
+
+  - preprocess:
+      name: Preprocess
+      description: Augment and balance the dataset after resize and normalization the dataset
+      enabled: false
+      script: /src/preprocessing/run_preprocessing.py
+      arguments:
+        # Settings related to resize and normalization phase
+        target_size: (128,128)
+        visualize: true
+        # Settings related to augment and balance phase
+        data_bias_ratio: 1 # The ratio of pneumonia:normal after balancing (0 for keeping the same)
+        augmentation_factor: 1.1 # How much to augment the biased partition
+        augmentation_settings:
+          horizontal_flip: True
+          rotation_range: 10
+          zoom_range: 0.2
+          width_shift_range: 0.1
+          height_shift_range: 0.1
+
+  - generate-train-test-verify-sets:
+      name: Generate separate sets for training, testing and verification
+      description: ...
+      enabled: false
+      script: /src/preprocessing/run_create_subsets.py
+      arguments:
+        train_ratio: 0.8 # Percent of data used for training
+        test_ratio: 0.1 # Percent of data used for testing
+        verify_ratio: 0.1 # Percent of data used for verification
+
+  - feature-extraction:
+      name: Extract features using SIFT and create histograms
+      description: ...
+      enabled: true
+      script: /src/ensemble/run_feature_extraction.py
+      arguments:
+        k: 10 # Optimal k for clustering
+
+  - random-forest:
+      name: Train and test random forest
+      description: ...
+      enabled: true
+      script: /src/ensemble/run_train_random_forest.py
+      arguments:
+        perform_k_fold: false
+        k_fold_n: 10
+        kmeans_k: 10
+
+  - cnn:
+      name: Train CNN
+      description: ...
+      enabled: false
+      script: /src/cnn/run_train_cnn.py
+      arguments:
+        validate: true
+        epochs: 10
+        batch_size: 32
+        use_custom_model: false
+
+  - find-k:
+      name: Find optimal k
+      description: ...
+      enabled: false
+      script: /src/ensemble/run_k_find.py
+      arguments:
+        use_elbow: true
