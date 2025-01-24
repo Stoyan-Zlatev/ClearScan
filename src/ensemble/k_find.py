@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.cluster import KMeans, MiniBatchKMeans
 from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import StandardScaler
 from sklearn.metrics import silhouette_score
 
 from src.common.path_utils import get_timestamp, resolve_path
@@ -58,22 +59,26 @@ def elbow_method(descriptors, k_range, num_threads=None):
     Returns:
         wcss: List of within-cluster sum of squares for each k.
     """
-    stacked_descriptors = np.vstack(descriptors)
+    #stacked_descriptors = np.vstack(descriptors)
 
     if num_threads is None:
         num_threads = multiprocessing.cpu_count()/2
 
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(descriptors)
+
+    pca = PCA(n_components=60, random_state=42)
+    reduced_descriptors = pca.fit_transform(X_scaled)
+
     def compute_wcss(k):
         print(f"Evaluating k={k}...")
         # Reduce to 50 dimensions (or another appropriate number)
-        #pca = PCA(n_components=50, random_state=42)
-        #reduced_descriptors = pca.fit_transform(stacked_descriptors)
         
-        kmeans = MiniBatchKMeans(n_clusters=k, random_state=42, batch_size=1024*16, n_init=10)
+        kmeans = MiniBatchKMeans(n_clusters=k, random_state=42, batch_size=1024*128, n_init=10)
         
         # n_init = 5
         #kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
-        kmeans.fit(stacked_descriptors)
+        kmeans.fit(reduced_descriptors)
         print(f"For k={k} wcss={kmeans.inertia_}")
         return kmeans.inertia_  # Inertia is the WCSS
 

@@ -48,11 +48,18 @@ if __name__ == "__main__":
     os.makedirs(resolve_path(f"/models/cnn/{timestamp}"), exist_ok=True)
     model.save(resolve_path(f"/models/cnn/{timestamp}/model.keras"))
 
+    os.makedirs(resolve_path(f"/results/cnn/{timestamp}"), exist_ok=True)
+    with open(resolve_path(f"/results/cnn/{timestamp}/config.py"), "w") as f:
+        with open(resolve_path("/src/cnn/train_cnn.py"), "r") as src:
+            f.write(src.read())
+
+    with open(resolve_path(f"/results/cnn/{timestamp}/config_args.txt"), "w") as f:
+        f.write(str(args))
+
     if(args.validate == False):
         exit(0)
 
     print("Evaluating model...")
-   
 
     test_loss, test_accuracy = model.evaluate(test_gen)
     report = f"Validation Loss: {test_loss:.4f}, Validation Accuracy: {test_accuracy:.4f}\n\n"
@@ -65,16 +72,8 @@ if __name__ == "__main__":
 
     print(report)
 
-    os.makedirs(resolve_path(f"/results/cnn/{timestamp}"), exist_ok=True)
     with open(resolve_path(f"/results/cnn/{timestamp}/validation_report.txt"), "w") as f:
         f.write(report)
-
-    with open(resolve_path(f"/results/cnn/{timestamp}/config.py"), "w") as f:
-        with open(resolve_path("/src/cnn/train_cnn.py"), "r") as src:
-            f.write(src.read())
-
-    with open(resolve_path(f"/results/cnn/{timestamp}/config_args.txt"), "w") as f:
-        f.write(str(args))
 
     print("Plotting results...")
     plt.figure(figsize=(12, 6))
