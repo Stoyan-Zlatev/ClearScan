@@ -111,8 +111,8 @@ def save_features():
     #X_val_raw = np.load(resolve_path("/data/processed/split/X_verify.npy"))
 
     print("Extracting features...")
-    X_train_descriptors = extract_sift_features(X_train_raw)
-    X_test_descriptors = extract_sift_features(X_test_raw)
+    X_train_descriptors = extract_lbp_features(X_train_raw)
+    X_test_descriptors = extract_lbp_features(X_test_raw)
     #X_val_descriptors = extract_sift_features(X_val_raw)
 
     os.makedirs(resolve_path("/data/processed/feat"), exist_ok=True)
@@ -123,7 +123,7 @@ def save_features():
 
 print("Extracting features...")
 save_features()
-exit()
+#exit()
 print("Loading data...")
 y_train = np.load(resolve_path("/data/processed/split/y_train.npy"))
 y_test = np.load(resolve_path("/data/processed/split/y_test.npy"))
@@ -132,12 +132,6 @@ y_test = np.load(resolve_path("/data/processed/split/y_test.npy"))
 X_train_descriptors = np.load(resolve_path("/data/processed/feat/X_train.npy"))
 X_test_descriptors = np.load(resolve_path("/data/processed/feat/X_test.npy"))
 #X_val_descriptors = np.load(resolve_path("/data/processed/feat/X_verify.npy"))
-
-
-print(X_train_descriptors.shape)
-print(X_test_descriptors.shape)
-print(y_train.shape)
-print(y_test.shape)
 
 # Define a parameter grid for Random Forest
 param_grid = {
